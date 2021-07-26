@@ -1,0 +1,182 @@
+#include<stdio.h>
+#include<stdlib.h>
+#include<string.h>
+#include"jrb.h"
+#include"dllist.h"
+#include"jval.h"
+typedef struct
+{
+  JRB edges;
+  JRB vertices;
+}Graph;
+Graph createGraph()
+{
+  Graph g;
+  g.edges = make_jrb();
+  g.vertices = make_jrb();
+  return g;
+}
+void addVertex(Graph g, int id, char *name)
+{
+  JRB node = jrb_find_int(g.vertices,id);
+  if(node==NULL)
+    jrb_insert_int(g.vertices,id,new_jval_v(strdup(name)));
+}
+char *getVertex(Graph g, int id)
+{
+  JRB node = jrb_find_int(g.vertices,id);
+  if(node == NULL)
+    return NULL;
+  else
+    return jval_s(node->val);
+}
+int hasEdge(Graph graph, int v1, int v2)
+{
+  JRB node, tree;
+  node = jrb_find_int(graph.edges,v1);
+  if(node == NULL)
+    return 0;
+  tree = (JRB)jval_v(node->val);
+  if(jrb_find_int(tree,v2)==NULL)
+    return 0;
+  else
+    return 1;
+}
+int adjacent(Graph graph, int v1, int v2)
+{
+  JRB node, tree;
+  node = jrb_find_int(graph, v1);
+  if(node==NULL)
+    return 0;
+  tree = (JRB)jval_v(node->val);
+  if(jrb_find_int(tree, v2)==NULL)
+    return 0;
+  else
+    return 1;
+}
+void addEdge(Graph graph,int v1,int v2,int weight)
+{
+    JRB node, tree;
+    if(adjacent(graph,v1,v2)==0)
+    {
+        node = jrb_find_int(graph.edges,v1);
+        if(node==NULL) 
+        {
+            tree = make_jrb();
+            jrb_insert_int(graph.edges,v1,new_jval_v(tree));
+            jrb_insert_int(tree,v2,new_jval_d(weight));
+        }else
+        {
+            tree = (JRB) jval_v(node->val);
+            jrb_insert_int(tree,v2,new_jval_d(weight));
+        }
+    }
+    if(adjacent(graph,v2,v1)==0)
+    {
+        node = jrb_find_int(graph.edges,v2);
+        if(node==NULL) 
+        {
+            tree = make_jrb();
+            jrb_insert_int(graph.edges,v2,new_jval_v(tree));
+            jrb_insert_int(tree,v1,new_jval_d(weight));
+        }else
+        {
+            tree = (JRB) jval_v(node->val);
+            jrb_insert_int(tree,v1,new_jval_d(weight));
+        }
+    }
+    }
+void makegraph(FILE *f,Graph g,int sohang)
+{
+  int sokho,id[10], mahang[10],sosp[10],socanh;
+  char tenkho[10];
+  int id1[10],id2[10],w[10];
+  fscanf(f,"%d",&sokho);
+  for(int a=0; a<sokho; a++)
+    {
+      fscanf(f,"%s %d",tenkho+a,&id[a]);
+      addVertex(g,id[a],tenkho+a);
+      for(int b=0; b< sohang;b++)
+	{
+          fscanf(f,"%d %d",&mahang[b],&sosp[b]);
+         
+	}
+    }
+  fscanf(f,"%d",&socanh);
+  for(int a=0; a<socanh; a++)
+    {
+      fscanf(f,"%d %d %d",&id1[a],&id2[a],&w[a]);
+      addEdge(g,id1[a],id2[a],w[a]);
+    }
+}
+int main(int argc, char* argv[])
+{
+        Graph g;  
+	FILE *fptr1,*fptr2;
+	int sokho,id[10];
+	char hang[10];
+	int sohang;
+	if(strcmp(argv[1],"-t")==0)
+	  {
+	    printf("C-Advanced, HK20192\n");
+	  }
+	else
+	  {
+	    if(strcmp(argv[1],"-s")==0)
+	      {
+                if (argc!=3)
+                  {
+		    printf("you entered wrong form\n");
+		    printf("the right form is: ./qlykhang -s file\n");
+	            return 1; 
+	          }
+	  	 fptr1=fopen(argv[2],"r+");
+                 if(fptr1==NULL)
+          	  {
+		   printf("Cannot open file %s\n",argv[2]);
+		   return 1;
+        	  }
+		 fscanf(fptr1,"%d",&sohang);
+		 printf("%d\n",sohang);
+		 
+		  for(int a=0;a< sohang ;a++)
+		   {
+		     fscanf(fptr1,"%s %d",hang+a,id+a);
+		     printf("%s %d\n",hang+a,*(id+a));
+		    }
+		  fclose(fptr1);   
+		 
+	      }
+	    else
+	      {
+		if(strcmp(argv[1],"-w")==0)
+		  {
+                    if (argc!=4)
+                     {
+		       printf("you entered wrong form\n");
+		       printf("the right form is: ./qlykhang -w file1 file2\n");
+	               return 1; 
+	             }
+		   fptr1=fopen(argv[2],"r+");
+                 if(fptr1==NULL)
+          	  {
+		   printf("Cannot open file %s\n",argv[2]);
+		   return 1;
+        	  }
+		 fscanf(fptr1,"%d",&sohang);
+	  	    fptr2=fopen(argv[3],"r+");
+                    if(fptr2==NULL)
+          	     {
+		      printf("Cannot open file %s\n",argv[3]);
+		      return 1;
+        	     }
+		    makegraph(fptr2,g,sohang);
+		    fclose(fptr1);
+		    fclose(fptr2);
+		  }
+		
+	       }
+
+	   }
+    return 0;
+}

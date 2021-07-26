@@ -1,0 +1,1 @@
+gcc -o main week11.c graph.c libfdr.a
